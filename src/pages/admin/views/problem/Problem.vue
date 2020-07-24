@@ -199,11 +199,25 @@
               <el-upload
                 action="/api/admin/test_case"
                 name="file"
-                :data="{spj: problem.spj}"
+                :data="{spj: problem.spj,_id:problem._id}"
                 :show-file-list="true"
                 :on-success="uploadSucceeded"
                 :on-error="uploadFailed">
                 <el-button size="small" type="primary" icon="el-icon-fa-upload">Choose File</el-button>
+              </el-upload>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="6">
+            <el-form-item :label="$t('m.ProblemZip')" :error="error.testcase">
+              <el-upload
+                action="/api/admin/add_problemzip"
+                name="file"
+                :data="{_id: problem._id}"
+                :show-file-list="true"
+                :on-success="uploadProblemZipSucceeded"
+                :on-error="uploadProblemZipFailed">
+                <el-button size="small" type="primary" icon="el-icon-fa-upload">Choose ProblemZip File</el-button>
               </el-upload>
             </el-form-item>
           </el-col>
@@ -298,6 +312,7 @@
           io_mode: {'io_mode': 'Standard IO', 'input': 'input.txt', 'output': 'output.txt'}
         },
         testCaseUploaded: false,
+        problemZipUploaded: false,
         allLanguage: {},
         inputVisible: false,
         tagInput: '',
@@ -310,7 +325,8 @@
           tags: '',
           spj: '',
           languages: '',
-          testCase: ''
+          testCase: '',
+          problemZip: ''
         }
       }
     },
@@ -468,19 +484,38 @@
           this.$error(response.data)
           return
         }
-        let fileList = response.data.info
-        for (let file of fileList) {
-          file.score = (100 / fileList.length).toFixed(0)
-          if (!file.output_name && this.problem.spj) {
-            file.output_name = '-'
-          }
-        }
-        this.problem.test_case_score = fileList
+        // let fileList = response.data.info
+        // for (let file of fileList) {
+        //   file.score = (100 / fileList.length).toFixed(0)
+        //   if (!file.output_name && this.problem.spj) {
+        //     file.output_name = '-'
+        //   }
+        // }
+        // this.problem.test_case_score = fileList
         this.testCaseUploaded = true
         this.problem.test_case_id = response.data.id
       },
       uploadFailed () {
-        this.$error('Upload failed')
+        this.$error('TestCase Upload failed')
+      },
+      uploadProblemZipSucceeded (response) {
+        if (response.error) {
+          this.$error(response.data)
+          return
+        }
+        // let fileList = response.data.info
+        // for (let file of fileList) {
+        //   file.score = (100 / fileList.length).toFixed(0)
+        //   if (!file.output_name && this.problem.spj) {
+        //     file.output_name = '-'
+        //   }
+        // }
+        // this.problem.test_case_score = fileList
+        this.problemZipUploaded = true
+        // this.problem.test_case_id = response.data.id
+      },
+      uploadProblemZipFailed () {
+        this.$error('ProblemZip Upload failed')
       },
       compileSPJ () {
         let data = {
@@ -543,6 +578,11 @@
         if (!this.testCaseUploaded) {
           this.error.testCase = 'Test case is not uploaded yet'
           this.$error(this.error.testCase)
+          return
+        }
+        if (!this.problemZipUploaded) {
+          this.error.problemZip = 'Problem Zip is not uploaded yet'
+          this.$error(this.error.problemZip)
           return
         }
         if (this.problem.rule_type === 'OI') {
