@@ -45,7 +45,9 @@
             <p class="title">{{$t('m.Source')}}</p>
             <p class="content">{{problem.source}}</p>
           </div>
-
+          <div>
+            <a @click="getPom">点击下载pom.xml文件</a>
+          </div>
         </div>
       </Panel>
       <!--problem main end-->
@@ -208,6 +210,7 @@
   import {JUDGE_STATUS, CONTEST_STATUS, buildProblemCodeKey} from '@/utils/constants'
   import api from '@oj/api'
   import {pie, largePie} from './chartData'
+  import axios from 'axios'
 
   // 只显示这些状态的图形占用
   const filtedStatus = ['-1', '-2', '0', '1', '2', '3', '4', '8']
@@ -228,6 +231,7 @@
         captchaSrc: '',
         contestID: '',
         problemID: '',
+        problem_id: '',
         submitting: false,
         code: '',
         language: 'C++',
@@ -370,6 +374,9 @@
           }
         })
       },
+      changeProblemId () {
+        this.problem_id = this.problem.id
+      },
       checkSubmissionStatus () {
         // 使用setTimeout避免一些问题
         if (this.refreshStatus) {
@@ -459,6 +466,46 @@
         } else {
           submitFunc(data, true)
         }
+      },
+      getPom () {
+        axios({
+          // baseURL: './',
+          url: 'problem/pom',
+          method: 'get',
+          responseType: 'blob', // 服务器返回的数据类型
+          params: { // 其他参数
+            problem_id: this.problem.id
+          },
+          data: {}
+        }).then((res) => {
+          // 此处有个坑。这里用content保存文件流，最初是content=res，但下载的test.xls里的内容如下图1，
+          // 检查了下才发现，后端对文件流做了一层封装，所以将content指向res.data即可
+          // 另外，流的转储属于浅拷贝，所以此处的content转储仅仅是便于理解，并没有实际作用=_=
+          const content = res.data
+          // console.log(content)
+          const blob = new Blob([content]) // 构造一个blob对象来处理数据
+          const fileName = 'pom.xml' // 导出文件名
+          // 对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
+          // IE10以上支持blob但是依然不支持download
+          if ('download' in document.createElement('a')) { // 支持a标签download的浏览器
+            const link = document.createElement('a') // 创建a标签
+            link.download = fileName // a标签添加属性
+            link.style.display = 'none'
+            link.href = URL.createObjectURL(blob)
+            document.body.appendChild(link)
+            link.click() // 执行下载
+            URL.revokeObjectURL(link.href) // 释放url
+            document.body.removeChild(link) // 释放标签
+          } else { // 其他浏览器
+            navigator.msSaveBlob(blob, fileName)
+          }
+          // this.btnSendTem = false
+        }).catch((error) => {
+          console.log(error)
+          // 关闭loading
+          // this.loading = false
+          // this.btnSendTem = false
+        })
       },
       onCopy (event) {
         this.$success('Code copied')

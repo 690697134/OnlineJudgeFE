@@ -268,6 +268,13 @@ export default {
     return ajax('admin/contest/acm_helper', 'put', {
       data
     })
+  },
+  getPomxml (id) {
+    return ajax('problem/pom', 'get', {
+      params: {
+        problem_id: id
+      }
+    })
   }
 }
 

@@ -391,6 +391,7 @@
             data.spj_language = data.spj_language || 'C'
             this.problem = data
             this.testCaseUploaded = true
+            this.problemZipUploaded = true
           })
         } else {
           this.title = this.$i18n.t('m.Add_Problem')
