@@ -566,6 +566,8 @@
           } else if (!this.problem.spj_compile_ok) {
             this.error.spj = 'SPJ code has not been successfully compiled'
           }
+          // added by mrhanice
+          this.error.spj = false
           if (this.error.spj) {
             this.$error(this.error.spj)
             return
