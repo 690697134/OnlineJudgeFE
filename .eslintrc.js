@@ -23,5 +23,10 @@ module.exports = {
       "skipTemplates": true
     }],
     "no-unused-vars": ["warn"]
-  }
+  },
+  env: { //环配置 如 "browser": true, node: true,
+    "node": true,
+    "browser": true,
+    "es6": true
+  },
 }
